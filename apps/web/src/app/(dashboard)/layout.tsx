@@ -70,7 +70,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Global trash dialog (for non-board pages) */}
       <TrashView
         open={trashOpen}
-        onOpenChange={setTrashOpen}
+        onOpenChange={(open) => {
+          setTrashOpen(open)
+          if (!open) {
+            // Refresh count when dialog closes
+            getAllDeletedTasksCount(supabase).then(setTrashCount).catch(() => {})
+          }
+        }}
         onRestored={() => {
           getAllDeletedTasksCount(supabase).then(setTrashCount).catch(() => {})
         }}

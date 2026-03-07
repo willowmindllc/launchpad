@@ -95,13 +95,14 @@ export function TrashView({
       try {
         await permanentlyDeleteTask(supabase, taskId)
         setDeletedTasks((prev) => prev.filter((t) => t.id !== taskId))
+        onRestored() // refresh sidebar count
       } catch (err) {
         console.error('Failed to permanently delete task:', err)
       } finally {
         setActionId(null)
       }
     },
-    [supabase]
+    [supabase, onRestored]
   )
 
   const handleEmptyTrash = useCallback(async () => {
@@ -111,6 +112,7 @@ export function TrashView({
         deletedTasks.map((t) => permanentlyDeleteTask(supabase, t.id))
       )
       setDeletedTasks([])
+      onRestored() // refresh sidebar count
     } catch (err) {
       console.error('Failed to empty trash:', err)
     } finally {
