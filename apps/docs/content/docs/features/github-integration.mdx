@@ -1,0 +1,97 @@
+---
+title: GitHub Integration
+description: Two-way sync between GitHub issues/PRs and the LaunchPad Kanban board.
+---
+
+## Overview
+
+Connect GitHub repos to LaunchPad projects for two-way sync between GitHub issues/PRs and the Kanban board. One repo = one project board.
+
+## Why
+
+Developers live in GitHub. Without integration, you're managing tasks in two places. This bridges the gap — one board to rule them all.
+
+## Features
+
+### GitHub OAuth Connection
+
+- User connects their GitHub account via OAuth (stored on profile)
+- Grants read/write access to repos and issues
+- Settings page shows connected account with disconnect option
+
+### Repo Linking
+
+- In project settings, pick a repo from your GitHub account
+- Each project can link to one repo
+- Linking creates a webhook on the repo for inbound events
+
+### Two-Way Sync
+
+**GitHub → LaunchPad (inbound via webhooks):**
+- Issue opened → task created in Backlog
+- Issue closed → task moved to Done
+- Issue labeled → priority mapped (bug=high, enhancement=medium, etc.)
+- PR opened referencing a task → PR link auto-commented on task
+- PR merged → task moved to Done (or Review)
+
+**LaunchPad → GitHub (outbound via API):**
+- Task created → optionally creates a GitHub issue
+- Task status changed → updates issue state (open/closed)
+
+### UI Enhancements
+
+- Task card shows GitHub issue number (#42) if linked
+- Task detail → Details tab shows linked issue URL, PR URLs
+- Project settings → "GitHub" tab for repo connection
+
+## Architecture
+
+```
+GitHub Webhooks → POST /api/webhooks/github
+  → verify signature (HMAC SHA-256)
+  → route by event type (issues, pull_request)
+  → create/update tasks via Supabase
+
+LaunchPad Actions → GitHub REST API
+  → create issues
+  → update issue state
+  → list repos for linking
+```
+
+## Database
+
+### `github_connections`
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| user_id | uuid FK → auth.users | unique |
+| access_token | text (encrypted) | GitHub OAuth token |
+| github_username | text | |
+| github_avatar_url | text | |
+| created_at | timestamptz | |
+
+### `project_github_links`
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| project_id | uuid FK → projects | unique |
+| repo_owner | text | e.g. "your-github-username" |
+| repo_name | text | e.g. "launchpad" |
+| webhook_id | bigint | GitHub webhook ID for cleanup |
+| sync_issues | boolean | default true |
+| created_at | timestamptz | |
+
+### `tasks` (added columns)
+
+| Column | Type | Notes |
+|--------|------|-------|
+| github_issue_number | int | nullable |
+| github_issue_url | text | nullable |
+
+## Setup Requirements
+
+- GitHub OAuth App (client ID + secret) in Vercel env vars
+- Webhook secret for HMAC verification
+- Environment variables: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_WEBHOOK_SECRET`

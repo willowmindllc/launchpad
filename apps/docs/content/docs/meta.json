@@ -1,0 +1,28 @@
+{
+  "title": "Documentation",
+  "root": true,
+  "pages": [
+    "getting-started",
+    "architecture",
+    "---Features---",
+    "features/kanban-board",
+    "features/ai-task-suggestions",
+    "features/chat-to-board",
+    "features/board-sharing",
+    "features/ticket-permalinks",
+    "features/task-comments",
+    "features/activity-log",
+    "features/soft-delete-trash",
+    "features/export-csv",
+    "features/github-integration",
+    "features/dashboard",
+    "features/task-search",
+    "features/bulk-actions",
+    "features/keyboard-shortcuts",
+    "features/project-settings",
+    "features/mobile-board",
+    "---Setup---",
+    "authentication",
+    "api-reference"
+  ]
+}

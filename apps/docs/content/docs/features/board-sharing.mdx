@@ -1,0 +1,73 @@
+---
+title: Board Sharing
+description: Invite collaborators to your project board with role-based access control and email notifications.
+---
+
+## Overview
+
+Share your project board with teammates, clients, or collaborators using an email-based invite system. Control exactly what each person can do with role-based access levels.
+
+## How It Works
+
+1. Open any project and click the **Share** button (top right)
+2. Enter an email address and select a role
+3. Click **Invite** — they receive an email with an "Accept Invitation" link
+4. If they already have an account, the invite auto-accepts on login
+5. If they're new, the link guides them through signup → auto-accept
+
+## Roles
+
+| Role | View Board | Add Comments | Create/Edit Tasks | Manage Members |
+|------|-----------|-------------|-------------------|----------------|
+| **Viewer** | ✅ | ❌ | ❌ | ❌ |
+| **Commenter** | ✅ | ✅ | ❌ | ❌ |
+| **Editor** | ✅ | ✅ | ✅ | ❌ |
+| **Owner** | ✅ | ✅ | ✅ | ✅ |
+
+## Share Dialog
+
+The share dialog shows:
+
+- **Invite form** — email input + role dropdown
+- **Current members** — with their roles and badges
+- **Pending invites** — invites that haven't been accepted yet, with a cancel (×) button
+
+Only **Owners** and **Admins** can see and use the Share button.
+
+## Email Invitations
+
+When you invite someone, they receive a branded email from `noreply@willowmindllc.tech` with:
+
+- The inviter's name
+- The project name
+- An **Accept Invitation** button linking to `/invite/accept?token=<id>`
+
+The accept page handles three scenarios:
+- **Logged in** → auto-accepts the invite, redirects to the project
+- **Not logged in** → redirects to login with a `?next=` param that preserves the invite link
+- **Invalid/expired token** → shows an appropriate error message
+
+## Shared with Me
+
+Projects shared with you appear in a separate **"Shared with me"** section on the Projects page, with a role badge (Viewer, Commenter, Editor) next to each project name.
+
+## Role-Based UI
+
+The board adapts based on your role:
+
+- **Viewers** see a read-only board — no drag-and-drop, no create/edit buttons, no Share button
+- **Commenters** can add comments on tasks but can't modify the board
+- **Editors** have full CRUD access to tasks but can't manage members
+
+## Database
+
+Board sharing uses two tables:
+
+- `project_members` — tracks who has access to which project and their role
+- `project_invites` — tracks pending email invitations with status (pending/accepted/revoked)
+
+Both tables are protected by Row Level Security policies that enforce role-based access.
+
+## Auto-Accept on Login
+
+When a user logs in, the auth callback automatically checks for any pending invites matching their email. If found, it converts them into `project_members` entries — no manual acceptance needed after the first login.

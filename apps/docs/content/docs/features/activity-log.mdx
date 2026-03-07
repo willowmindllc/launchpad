@@ -1,0 +1,59 @@
+---
+title: Activity Log
+description: Automatic tracking of every task change with a unified timeline of comments and history.
+---
+
+## Overview
+
+Every change to a task — title, status, priority, description, trash/restore — is automatically logged. The task detail sheet shows a unified timeline of comments and activity.
+
+## Why
+
+Accidental edits happen. Activity logs provide accountability, traceability, and undo context. Standard in every serious project management tool.
+
+## How It Works
+
+### Database
+
+The `task_activity` table:
+- `id` (uuid PK), `task_id` (FK → tasks), `user_id` (FK → auth.users), `action`, `old_value`, `new_value`, `created_at`
+- Populated automatically via a Postgres `AFTER UPDATE` trigger on `tasks`
+- Trigger function `log_task_changes()` runs as `SECURITY DEFINER` to bypass RLS for inserts
+
+### Tracked Actions
+
+| Action | Description |
+|--------|-------------|
+| `title_changed` | Task title was edited |
+| `status_changed` | Task moved between columns |
+| `priority_changed` | Priority level updated |
+| `description_changed` | Description was edited |
+| `trashed` | Task moved to trash |
+| `restored` | Task restored from trash |
+
+Description values are truncated to 100 characters in the log.
+
+### Trigger
+
+The `task_changes_trigger` fires on every `UPDATE` to the `tasks` table:
+- Compares OLD vs NEW values using `IS DISTINCT FROM`
+- Inserts one `task_activity` row per changed field
+- A single update can produce multiple log entries
+- Uses `auth.uid()` to capture who made the change
+
+### UI — Unified Timeline
+
+The task detail sheet shows an "Activity" section with combined comments and history:
+- Toggle **"Show/Hide history"** to filter activity entries
+- Comments appear as cards (existing style)
+- Activity appears as compact timeline entries: *"Sam changed status from backlog → in_progress"*
+- Both sorted chronologically in a single feed
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/20260222_task_activity.sql` | Table + trigger + RLS |
+| `src/types/database.ts` | `TaskActivity` + `TaskActivityAction` types |
+| `src/lib/supabase/queries.ts` | `getTaskActivity` query |
+| `src/components/board/task-detail-sheet.tsx` | Unified timeline UI |

@@ -1,0 +1,31 @@
+---
+title: Mobile Responsive Board
+description: Tab-based single column navigation for mobile devices.
+---
+
+## Overview
+
+On screens narrower than 768px, the Kanban board switches from a multi-column layout to a single-column view with tab navigation. Task cards are full-width and readable on phones.
+
+## Mobile Layout
+
+- **Tab bar:** Horizontal tabs at the top of the board — Backlog, In Progress, Review, Done
+- **Single column:** Only the selected column's tasks are visible
+- **Full width:** Task cards span the full screen width
+- **Task count:** Each tab shows its task count as a badge
+
+## Switching Columns
+
+- **Tap a tab** to switch columns
+- **Keyboard shortcuts:** Press `1`–`4` to switch columns
+
+## Desktop Layout
+
+On screens 768px and wider, all four columns display side by side in the traditional Kanban layout with horizontal scrolling if needed.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/board/mobile-column-tabs.tsx` | Tab bar component for mobile |
+| `src/components/board/kanban-board-live.tsx` | Responsive column rendering |

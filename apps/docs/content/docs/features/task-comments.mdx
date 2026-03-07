@@ -1,0 +1,54 @@
+---
+title: Task Comments
+description: Post notes, PR links, and discussion threads on any task.
+---
+
+## Overview
+
+A comment section inside the task detail sheet where users can post notes, PR links, and discussion threads per task.
+
+## Why
+
+Tasks need context beyond title and description. When reviewing work, you need to link PRs, leave notes, and ask questions. Without comments, that context lives in Slack, Discord, or nowhere.
+
+## How It Works
+
+### Database
+
+The `task_comments` table:
+- `id` (uuid PK), `task_id` (FK → tasks), `user_id` (FK → auth.users), `content` (text), `created_at`
+- **RLS:** Users can read/create/delete comments on tasks in projects they have access to
+- **Cascade delete:** Deleting a task removes all its comments
+
+### UI
+
+The comments section appears below the Description field in the task detail sheet:
+
+- Each comment shows: user initial avatar, display name, relative timestamp, content
+- URLs in comments are auto-linkified (clickable) — especially useful for GitHub PR links
+- Text input + "Post" button to add comments
+- Delete button (trash icon) on your own comments only
+- Comments load on sheet open, refetch after posting/deleting
+
+## Usage Pattern
+
+1. Open a task → scroll to Comments
+2. Paste a PR link: `https://github.com/your-github-username/launchpad/pull/5`
+3. It becomes a clickable link automatically
+4. Team can discuss, leave notes, track progress per task
+
+## Queries
+
+| Function | Description |
+|----------|-------------|
+| `getTaskComments(supabase, taskId)` | Fetch all comments, ordered by `created_at` |
+| `createTaskComment(supabase, { task_id, user_id, content })` | Insert a comment |
+| `deleteTaskComment(supabase, commentId)` | Delete a comment |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/20260222_task_comments.sql` | Migration: table + RLS + indexes |
+| `src/components/board/task-detail-sheet.tsx` | Comments UI in task sheet |
+| `src/lib/supabase/queries.ts` | CRUD queries for comments |

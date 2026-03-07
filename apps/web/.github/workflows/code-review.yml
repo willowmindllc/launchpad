@@ -1,0 +1,83 @@
+name: Mahadev Builder Code Review 🔱
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get PR diff
+        id: diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+          
+          # Fetch PR files
+          PR_FILES=$(gh api "repos/$REPO/pulls/$PR_NUM/files" --paginate)
+          # Fetch title/body via API to avoid shell injection from markdown
+          PR_TITLE=$(gh api "repos/$REPO/pulls/$PR_NUM" --jq '.title')
+          PR_BODY=$(gh api "repos/$REPO/pulls/$PR_NUM" --jq '.body // ""')
+          
+          ISSUES=""
+          PASSES=""
+          
+          # Load config
+          if [ -f .reviewerrc.json ]; then
+            CONFIG=$(cat .reviewerrc.json)
+          else
+            CONFIG='{}'
+          fi
+          
+          REQUIRE_DOCS=$(echo "$CONFIG" | jq -r '.requireDocs // true')
+          REQUIRE_TICKET=$(echo "$CONFIG" | jq -r '.requireTicketRef // true')
+          TICKET_PATTERN=$(echo "$CONFIG" | jq -r '.ticketPattern // "MY-\\d+|LP-\\d+|BP-\\d+|WM-\\d+"')
+          FORBIDDEN=$(echo "$CONFIG" | jq -r '.forbiddenFiles // [".env", ".env.local", ".env.production"] | .[]')
+          
+          # Check ticket ref
+          if [ "$REQUIRE_TICKET" = "true" ]; then
+            if echo "$PR_TITLE $PR_BODY" | grep -qEi "$TICKET_PATTERN"; then
+              PASSES="$PASSES\n✅ Ticket reference found"
+            else
+              ISSUES="$ISSUES\n❌ **Missing ticket reference**"
+            fi
+          fi
+          
+          # Check docs
+          if [ "$REQUIRE_DOCS" = "true" ]; then
+            DOC_FILES=$(echo "$PR_FILES" | jq -r '.[].filename' | grep -c '\.md$' || true)
+            if [ "$DOC_FILES" -gt 0 ]; then
+              PASSES="$PASSES\n✅ Docs included"
+            else
+              ISSUES="$ISSUES\n❌ **Missing docs**"
+            fi
+          fi
+          
+          # Check forbidden files
+          for FILE in $FORBIDDEN; do
+            FOUND=$(echo "$PR_FILES" | jq -r '.[].filename' | grep -c "^${FILE}$" || true)
+            if [ "$FOUND" -gt 0 ]; then
+              ISSUES="$ISSUES\n❌ **Forbidden file: \`$FILE\`**"
+            fi
+          done
+          
+          # Build review body
+          BODY="# 🔍 Code Review\n\n## Rule Checks\n$PASSES\n$ISSUES\n\n---\n*🔱 Mahadev Builder Code Reviewer*"
+          
+          # Post comment
+          gh api "repos/$REPO/issues/$PR_NUM/comments" \
+            --method POST \
+            -f body="$(echo -e "$BODY")"
+          
+          echo "✅ Review posted"

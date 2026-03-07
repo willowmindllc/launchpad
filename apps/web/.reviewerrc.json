@@ -1,0 +1,12 @@
+{
+    "maxFunctionLines": 80,
+    "requireDocs": true,
+    "requireTicketRef": true,
+    "ticketPattern": "LP-\\d+",
+    "forbiddenFiles": [
+        ".env",
+        ".env.local",
+        ".env.production"
+    ],
+    "aiReview": true
+}

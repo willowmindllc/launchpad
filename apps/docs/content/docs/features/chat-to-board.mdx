@@ -1,0 +1,92 @@
+---
+title: Chat-to-Board
+description: Describe your project in natural language and let AI create tasks on your Kanban board.
+---
+
+## Overview
+
+Chat-to-Board is an AI-powered chat panel that lets you describe features in natural language and get actionable tasks added directly to your Kanban board. It also supports natural language board management — "mark X as done", "move Y to review".
+
+## Why
+
+Typing tasks one-by-one is slow. Most people think in paragraphs, not ticket fields. Chat-to-Board bridges that gap — describe what you're building, and the AI breaks it into tasks with priorities.
+
+## How It Works
+
+### Frontend
+
+- Floating chat bubble (bottom-right) opens a slide-up panel
+- **Mobile:** full-width panel | **Desktop:** 420px fixed-width panel
+- Sends conversation history + project context to `/api/ai/chat`
+- AI responses can include:
+  - **Task suggestions** — rendered as cards with "Add" / "Add All" buttons
+  - **Task actions** — status updates or deletions executed against Supabase
+
+### Backend
+
+The `/api/ai/chat` endpoint:
+1. Authenticates the request (requires Supabase session)
+2. Fetches BYOK settings from `profiles`
+3. Falls back to server `GROQ_API_KEY` if no BYOK
+4. Sends a structured system prompt forcing JSON output:
+
+```json
+{
+  "message": "Conversational response",
+  "tasks": [{ "title", "description", "priority", "status" }],
+  "actions": [{ "type": "update_status|delete_task", "taskTitle", "status?" }]
+}
+```
+
+### Supported Actions
+
+| Command | Action |
+|---------|--------|
+| "mark X as done" | `update_status` → `done` |
+| "move X to review" | `update_status` → `review` |
+| "delete X" | `delete_task` |
+
+Task matching is fuzzy — the AI extracts the closest task title from your phrasing.
+
+## Architecture
+
+```
+User types message
+  → chat-to-board.tsx (client)
+    → POST /api/ai/chat
+      → reads BYOK from profiles table
+      → calls AI provider (Groq/OpenAI/Anthropic/Gemini)
+      → returns { message, tasks[], actions[] }
+    → renders response + task cards
+    → "Add" inserts task into Supabase tasks table
+    → "Add All" bulk-inserts all suggested tasks
+    → actions execute status updates via Supabase client
+  → onTasksAdded() refreshes kanban board
+```
+
+## Data Persistence
+
+**Tasks persist** — when you click "Add" or "Add All", tasks are inserted into the Supabase `tasks` table immediately.
+
+**Chat conversations do not persist yet.** The message history lives in React state. Opening the panel starts a fresh conversation; closing it discards the history. Added tasks remain on the board.
+
+### Planned: Persistent Chat History
+
+- `chat_sessions` table (id, project_id, user_id, title, created_at)
+- `chat_messages` table (id, session_id, role, content, tasks_json, actions_json, created_at)
+- RLS policies scoped to the owning user
+- Sidebar in chat panel to switch between past conversations
+
+## Design Decisions
+
+- **JSON-only system prompt:** AI must return valid JSON (no markdown fences) for predictable parsing
+- **Context-aware:** Current board tasks are sent to the AI so it can reference existing work
+- **No streaming:** Full response returned at once — task cards need the complete response to render
+- **Conversation memory:** Full chat history sent each request (within the panel session)
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/board/chat-to-board.tsx` | Chat panel UI + task/action handling |
+| `src/app/api/ai/chat/route.ts` | AI endpoint with multi-provider router |

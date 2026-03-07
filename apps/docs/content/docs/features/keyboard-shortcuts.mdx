@@ -1,0 +1,34 @@
+---
+title: Keyboard Shortcuts
+description: Power user shortcuts for fast board navigation and task management.
+---
+
+## Overview
+
+Keyboard shortcuts let power users navigate the board without touching the mouse. Press `?` from any board page to see the shortcuts help dialog.
+
+## Available Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `N` | Open new task dialog |
+| `/` | Focus the search bar |
+| `?` | Show shortcuts help dialog |
+| `1` | Switch to Backlog column (mobile) |
+| `2` | Switch to In Progress column (mobile) |
+| `3` | Switch to Review column (mobile) |
+| `4` | Switch to Done column (mobile) |
+| `Esc` | Close open dialogs, sheets, or exit selection mode |
+
+## Notes
+
+- Shortcuts are disabled when a text input or textarea is focused (to avoid conflicts)
+- Column switching (`1`–`4`) is primarily useful on mobile where only one column is visible at a time
+- The shortcuts dialog is a modal overlay — press `?` again or `Esc` to close
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/hooks/use-keyboard-shortcuts.ts` | Central shortcut hook |
+| `src/components/board/keyboard-shortcuts-dialog.tsx` | Help dialog listing all shortcuts |

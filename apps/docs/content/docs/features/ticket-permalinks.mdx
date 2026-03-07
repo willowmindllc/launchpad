@@ -1,0 +1,38 @@
+---
+title: Ticket Permalinks
+description: Deep link to any task with a shareable, bookmarkable URL.
+---
+
+## Overview
+
+Every task on your board has a unique permalink that you can share, bookmark, or reference in commits, PRs, and documentation.
+
+## URL Format
+
+```
+https://launchpad-your-github-username.vercel.app/projects/{projectId}/task/{taskId}
+```
+
+## How to Get a Permalink
+
+1. Click on any task to open the detail sheet
+2. Click the **Copy Link** button (link icon)
+3. The permalink is copied to your clipboard
+
+## Features
+
+- **Direct access** — opening a permalink loads the full task detail page with title, description, status, priority, comments, and activity log
+- **Back navigation** — a back button returns you to the project board
+- **SEO metadata** — each task page generates proper `<title>` and `<meta>` tags via `generateMetadata`
+- **404 handling** — invalid task or project IDs show a clean "not found" page
+
+## Use Cases
+
+- Reference tasks in Git commit messages: `fix: resolve auth bug (see /projects/.../task/...)`
+- Link tasks in PR descriptions
+- Bookmark important tasks for quick access
+- Share specific tasks with collaborators via email or chat
+
+## Implementation
+
+Task permalinks use a dedicated Next.js route at `src/app/(dashboard)/projects/[id]/task/[taskId]/page.tsx` with a reusable `TaskDetailContent` component shared between the permalink page and the board's task sheet.

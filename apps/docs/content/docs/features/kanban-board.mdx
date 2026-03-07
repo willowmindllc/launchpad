@@ -1,0 +1,72 @@
+---
+title: Kanban Board
+description: Drag-and-drop task management with four columns and real-time reordering.
+---
+
+## Overview
+
+The Kanban board is LaunchPad's core interface. Tasks are organized into four columns — **Backlog**, **In Progress**, **Review**, and **Done** — and can be moved between columns via drag-and-drop.
+
+## Smart Sorting
+
+Tasks are sorted by ticket number, not priority or creation date:
+
+- **Backlog:** Ascending (LP-001 → LP-025) — chronological planning order
+- **In Progress / Review / Done:** Descending — latest work appears at the top
+- **Priority badges** remain visible on cards for quick scanning but don't affect sort order
+
+## Auto-Numbering
+
+New tasks automatically receive the next ticket number:
+
+- Detects the project prefix from existing tasks (e.g., "LP-" from "LP-043")
+- Assigns the next sequential number (LP-044, LP-045, etc.)
+- If you type a full title with a number, it won't double-prefix
+
+## Drag-and-Drop
+
+- **Library:** `@dnd-kit/core` + `@dnd-kit/sortable`
+- **Cross-column moves:** Drag a task from one status column to another
+- **Within-column reordering:** Drag tasks up/down within the same column
+- **Optimistic updates:** The card moves instantly; the server syncs in the background
+
+## Task Detail Sheet
+
+Click any task card to open a slide-out sheet with full details:
+
+- **Title** — inline editable
+- **Description** — markdown-friendly text area
+- **Status** — dropdown (Backlog / In Progress / Review / Done)
+- **Priority** — dropdown (Low / Medium / High / Urgent)
+- **Due date** — date picker
+- **Comments** — threaded discussion per task
+- **Activity log** — full edit history
+
+Changes save on blur — no "Save" button needed.
+
+## Export to CSV
+
+Download all project tasks as a CSV file:
+
+- **Columns:** Title, Description, Status, Priority, Due Date, Created, Updated
+- **Filename:** `{project-name}-tasks-{YYYY-MM-DD}.csv`
+- **Details:** UTF-8 BOM for Excel compatibility, proper escaping of commas/quotes
+- **How:** Client-side generation — no API call needed
+
+## Dark Mode
+
+LaunchPad ships dark-first using Tailwind CSS custom properties. All components use semantic tokens like `bg-background` and `text-foreground` that adapt to the active theme.
+
+## Mobile Responsive
+
+On mobile (under 768px), the board switches to a tab-based single column view. See [Mobile Responsive Board](/docs/features/mobile-board) for details.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/board/kanban-board-live.tsx` | DndContext + columns + drag overlay |
+| `src/components/board/task-card-live.tsx` | Draggable task card |
+| `src/components/board/task-detail-sheet.tsx` | Side sheet for editing |
+| `src/components/board/create-task-dialog-live.tsx` | New task dialog |
+| `src/lib/export-csv.ts` | CSV export utility |

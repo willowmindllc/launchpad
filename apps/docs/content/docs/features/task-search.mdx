@@ -1,0 +1,31 @@
+---
+title: Task Search & Filter
+description: Find tasks quickly with search and priority filtering across your board.
+---
+
+## Overview
+
+As boards grow, finding specific tasks becomes difficult. LaunchPad includes a search bar and priority filter in the board toolbar that instantly filter visible tasks across all columns.
+
+## Search
+
+- **Location:** Top toolbar above the board columns
+- **Keyboard shortcut:** Press `/` to focus the search bar from anywhere
+- **Matches:** Title and description text
+- **Behavior:** Results filter in real-time as you type, with matching text highlighted in yellow
+- **Result count:** Shown next to the search bar (e.g., "3 results")
+- **Empty state:** Columns with no matching tasks show "No matching tasks"
+
+## Priority Filter
+
+- **Location:** Filter button next to the search bar
+- **Options:** Low, Medium, High, Urgent (multi-select)
+- **Behavior:** Combines with search — both filters apply simultaneously
+- **Clear:** Click the filter button again to remove priority filters
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/board/task-search.tsx` | Search input + filter dropdown + highlight utility |
+| `src/components/board/kanban-board-live.tsx` | Applies filters to task list |

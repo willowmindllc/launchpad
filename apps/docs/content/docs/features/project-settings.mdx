@@ -1,0 +1,45 @@
+---
+title: Project Settings & Archive
+description: Edit project details, archive projects, and auto-delete with countdown.
+---
+
+## Project Settings
+
+Each project has a settings page at `/projects/[id]/settings` with:
+
+- **Edit name and description** — Inline form, saves on submit
+- **Back navigation** — Button to return to the board
+- **Danger zone** — Destructive actions isolated at the bottom
+
+### Accessing Settings
+- Click the gear icon on the project board header
+- Or navigate directly to `/projects/[id]/settings`
+
+## Project Archive
+
+Projects can be archived instead of permanently deleted:
+
+1. **Archive:** Click the 3-dot menu on any project card → "Archive"
+2. **Archived section:** Archived projects appear in a collapsed section at the bottom of the projects list
+3. **Restore:** Click "Restore" on an archived project card to bring it back
+4. **Auto-delete:** Archived projects are **automatically deleted after 7 days**
+   - A countdown badge shows "Auto-deletes in X days" on each archived card
+   - `pg_cron` runs daily to purge expired archives
+
+### Project Delete
+
+- **Double confirmation:** Typing the project name to confirm permanent deletion
+- **Cascading:** Deletes all tasks, comments, activity, and invitations
+- **Only owners** can delete or archive projects
+
+## Soft-Deleted Tasks
+
+Trashed tasks also auto-purge after 7 days via the same `pg_cron` job. The `purge_expired_archives()` function handles both projects and tasks.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(dashboard)/projects/[id]/settings/page.tsx` | Settings page |
+| `src/components/projects/project-list.tsx` | Archive section, 3-dot menu |
+| `supabase/migrations/..._auto_delete_archives.sql` | `archived_at` column + pg_cron job |

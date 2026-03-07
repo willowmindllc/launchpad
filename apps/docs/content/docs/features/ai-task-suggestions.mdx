@@ -1,0 +1,64 @@
+---
+title: AI Task Suggestions
+description: Generate actionable tasks from your project description using AI with multi-provider support.
+---
+
+## Overview
+
+Click **"Generate Tasks with AI"** on any project board and LaunchPad will suggest 5-8 actionable tasks based on your project name and description.
+
+## How It Works
+
+1. User clicks the button — a dialog opens
+2. Frontend calls `POST /api/ai/suggest-tasks` with project name + description
+3. Backend sends a prompt to the configured AI provider
+4. Returns a JSON array of tasks with title, description, and priority
+5. User reviews, edits, or removes suggestions — then clicks **"Add Tasks"** to create them
+
+## Supported Providers (BYOK)
+
+LaunchPad supports **Bring Your Own Key** — users can plug in their preferred AI provider instead of using the server default.
+
+| Provider | Model | Tier |
+|----------|-------|------|
+| Groq | Llama 3.3 70B | Free |
+| OpenAI | GPT-4o-mini | Paid |
+| Anthropic | Claude Sonnet | Paid |
+| Google Gemini | 2.0 Flash | Free (billing required) |
+
+### Setting Up BYOK
+
+1. Go to **Settings → AI Settings**
+2. Select your provider
+3. Paste your API key
+4. Save — the key is stored in `profiles.ai_api_key`
+
+When generating suggestions, the backend checks for a user key first. If none is found, it falls back to the server-side `GROQ_API_KEY`.
+
+## Provider API Formats
+
+Each provider has a different API format. The `PROVIDER_CONFIG` map in the route handler manages:
+
+- **Groq/OpenAI:** OpenAI-compatible `/v1/chat/completions` with `Authorization: Bearer` header
+- **Anthropic:** `/v1/messages` with `x-api-key` + `anthropic-version` headers
+- **Google Gemini:** `/v1beta/models/gemini-2.0-flash:generateContent` with API key as query param
+
+## Security
+
+- API keys are stored in the `profiles` table
+- Only the owning user can access their key via the `get_my_ai_settings()` security definer function
+- Keys are never exposed to the client — all AI calls go through the server
+
+## Environment Variables
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `GROQ_API_KEY` | Vercel env + `.env.local` | Server default AI key |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/api/ai/suggest-tasks/route.ts` | AI endpoint with multi-provider router |
+| `src/components/board/ai-suggest-dialog.tsx` | Suggestion review UI |
+| `src/app/(dashboard)/settings/page.tsx` | BYOK settings page |

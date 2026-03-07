@@ -1,0 +1,51 @@
+---
+title: Dashboard
+description: Stats, completion tracking, recent activity, and stale task detection at a glance.
+---
+
+## Overview
+
+The dashboard is the first page you see after login. It provides a complete picture of where things stand across all your projects.
+
+## Sections
+
+### Stat Cards
+
+Top row with four key metrics:
+
+| Stat | Description |
+|------|-------------|
+| **Total Tasks** | Count across all projects |
+| **In Progress** | Tasks currently being worked on |
+| **Completed** | Done tasks |
+| **Overdue** | Past due date and not done (highlighted red if > 0) |
+
+### Completion Rate
+
+- Percentage bar showing done vs total
+- Visual progress indicator across all projects
+
+### My Projects
+
+- Each project with a clickable link to its board
+- Per-project progress bar (done/total)
+- "Active" badge showing in-progress count
+
+### Recent Activity
+
+- Last 10 task changes across all projects
+- Shows who did what: *"Sam changed status backlog → in_progress"*
+- Timestamps for each entry
+
+### Stale Tasks
+
+- Tasks in backlog for 7+ days
+- Shows age in days
+- Nudges you to prioritize or archive
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/(dashboard)/dashboard/page.tsx` | Dashboard page |
+| `src/lib/supabase/queries.ts` | `getDashboardStats()` query |

@@ -1,0 +1,171 @@
+---
+title: API Reference
+description: All API routes, database queries, and Supabase functions used by LaunchPad.
+---
+
+## API Routes
+
+LaunchPad uses Next.js API routes for server-side operations. All routes require authentication via Supabase session cookies.
+
+### AI Endpoints
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/ai/suggest-tasks` | POST | Generate AI task suggestions for a project |
+| `/api/ai/chat` | POST | Chat-to-Board conversation endpoint |
+
+**Request body for `/api/ai/suggest-tasks`:**
+```json
+{
+  "projectName": "My Project",
+  "projectDescription": "A web app for..."
+}
+```
+
+**Request body for `/api/ai/chat`:**
+```json
+{
+  "messages": [{ "role": "user", "content": "Add auth tasks" }],
+  "projectId": "uuid",
+  "existingTasks": [{ "title": "...", "status": "..." }]
+}
+```
+
+**Response format (both endpoints):**
+```json
+{
+  "message": "Here are some tasks...",
+  "tasks": [
+    {
+      "title": "Set up authentication",
+      "description": "Implement login/signup flow",
+      "priority": "high",
+      "status": "backlog"
+    }
+  ],
+  "actions": []
+}
+```
+
+### Auth Endpoints
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/auth/callback` | GET | OAuth callback handler (exchanges code for session) |
+| `/api/auth/github-connect` | POST | Connect GitHub account for integration |
+
+### GitHub Integration
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/webhooks/github` | POST | Inbound webhook handler (HMAC verified) |
+| `/api/github/repos` | GET | List user's GitHub repos |
+| `/api/github/link` | POST | Link/unlink a repo to a project |
+
+## Database Queries
+
+All database operations are centralized in `src/lib/supabase/queries.ts`.
+
+### Projects
+
+| Function | Description |
+|----------|-------------|
+| `getProjects(supabase)` | Fetch all accessible projects with task counts |
+| `createProject(supabase, data)` | Create a new project |
+| `updateProject(supabase, id, data)` | Update project details |
+| `deleteProject(supabase, id)` | Delete a project |
+
+### Tasks
+
+| Function | Description |
+|----------|-------------|
+| `getTasks(supabase, projectId)` | Fetch all active tasks for a project |
+| `createTask(supabase, data)` | Create a new task |
+| `updateTask(supabase, id, data)` | Update task fields |
+| `moveTask(supabase, id, status, position)` | Move task to new column/position |
+| `deleteTask(supabase, id)` | Soft delete (move to trash) |
+| `restoreTask(supabase, id)` | Restore from trash |
+| `permanentlyDeleteTask(supabase, id)` | Hard delete |
+| `getDeletedTasks(supabase, projectId)` | Fetch trashed tasks |
+
+### Comments
+
+| Function | Description |
+|----------|-------------|
+| `getTaskComments(supabase, taskId)` | Fetch all comments for a task |
+| `createTaskComment(supabase, data)` | Post a new comment |
+| `deleteTaskComment(supabase, commentId)` | Delete a comment |
+
+### Activity
+
+| Function | Description |
+|----------|-------------|
+| `getTaskActivity(supabase, taskId)` | Fetch activity log with user profiles |
+
+### Dashboard
+
+| Function | Description |
+|----------|-------------|
+| `getDashboardStats(supabase)` | Aggregate stats across all projects |
+
+## Security Definer Functions
+
+These PostgreSQL functions bypass RLS for internal checks:
+
+| Function | Purpose |
+|----------|---------|
+| `can_access_project(project_id, user_id)` | Check if user owns or is member of project |
+| `get_my_ai_settings()` | Return current user's AI provider + API key |
+| `handle_new_user()` | Trigger: create profile on first login |
+| `log_task_changes()` | Trigger: log field changes to `task_activity` |
+
+## Supabase Client Setup
+
+### Browser Client
+
+```typescript
+import { createBrowserClient } from "@supabase/ssr";
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+```
+
+### Server Client
+
+```typescript
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+export async function createClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+}
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
+| `GROQ_API_KEY` | No | Server-side AI key (fallback) |
+| `GITHUB_CLIENT_ID` | No | GitHub OAuth App client ID |
+| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth App client secret |
+| `GITHUB_WEBHOOK_SECRET` | No | HMAC secret for webhook verification |

@@ -1,0 +1,70 @@
+---
+title: Getting Started
+description: Set up LaunchPad locally and start managing your projects.
+---
+
+## Prerequisites
+
+- **Node.js** 20+ and [pnpm](https://pnpm.io/)
+- A **Supabase** project ([create one free](https://supabase.com))
+- A **GitHub OAuth App** (for GitHub login)
+- Optionally: a **Google OAuth** credential (for Google login)
+
+## Clone & Install
+
+```bash
+git clone https://github.com/your-github-username/launchpad.git
+cd launchpad
+pnpm install
+```
+
+## Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+GROQ_API_KEY=your-groq-api-key  # optional, for AI features
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous/public key |
+| `GROQ_API_KEY` | No | Server-side AI key (Groq Llama 3.3 70B) |
+
+## Database Setup
+
+Run the Supabase migrations to create all required tables:
+
+```bash
+npx supabase db push
+```
+
+This creates the `profiles`, `projects`, `tasks`, `project_members`, `task_comments`, and `task_activity` tables with Row Level Security policies.
+
+## Run the Dev Server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) — you should see the login page.
+
+## First Login
+
+1. Click **Sign in with GitHub** (or Google, or use email/password)
+2. Authorize the app
+3. You'll be redirected to the dashboard
+4. Create your first project and start adding tasks
+
+## Deploy to Vercel
+
+```bash
+pnpm build   # verify the build works locally
+```
+
+Then push to GitHub and connect the repo to [Vercel](https://vercel.com). Set the same environment variables in the Vercel project settings.
+
+The app auto-deploys on every push to `main`.

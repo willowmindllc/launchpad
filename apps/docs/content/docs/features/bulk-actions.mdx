@@ -1,0 +1,36 @@
+---
+title: Bulk Task Actions
+description: Select multiple tasks and perform batch operations — move, change priority, or delete.
+---
+
+## Overview
+
+Bulk actions let you select multiple tasks and perform batch operations without editing each one individually. Useful for triaging backlogs, cleaning up done columns, or re-prioritizing sprints.
+
+## How to Use
+
+1. **Enter selection mode:** Click the "Select" button in the board toolbar
+2. **Select tasks:** Click on task cards or their checkboxes to select/deselect
+3. **Perform actions:** A floating action bar appears at the bottom of the screen showing:
+   - **Selected count** — "3 tasks selected"
+   - **Move to** — Batch move tasks to any column (Backlog, In Progress, Review, Done)
+   - **Priority** — Batch change priority (Low, Medium, High, Urgent)
+   - **Delete** — Batch soft-delete selected tasks (recoverable from Trash)
+   - **Clear** — Deselect all
+4. **Exit:** Click "Exit Select" in the toolbar or press `Esc`
+
+## Selection Behavior
+
+- Clicking a card toggles its selection
+- Checkboxes on each card provide a clear visual indicator (filled when selected)
+- Selected cards have a subtle highlighted background and border
+- Drag-and-drop is disabled while in selection mode
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/board/bulk-action-bar.tsx` | Floating action bar with batch operations |
+| `src/components/board/task-card-live.tsx` | Checkbox selection on cards |
+| `src/components/board/kanban-board-live.tsx` | Selection state management |
+| `src/lib/supabase/queries.ts` | `bulkMoveTasks`, `bulkUpdatePriority`, `bulkDeleteTasks` |
