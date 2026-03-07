@@ -40,7 +40,7 @@ const priorityColors: Record<TaskPriority, string> = {
 }
 
 interface TrashViewProps {
-  projectId: string
+  projectId?: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onRestored: () => void

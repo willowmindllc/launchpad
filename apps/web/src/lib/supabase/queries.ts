@@ -278,15 +278,27 @@ export async function bulkDeleteTasks(supabase: SupabaseClient, taskIds: string[
   if (error) throw error
 }
 
-export async function getDeletedTasks(supabase: SupabaseClient, projectId: string) {
-  const { data, error } = await supabase
+export async function getDeletedTasks(supabase: SupabaseClient, projectId?: string) {
+  let query = supabase
     .from('tasks')
     .select('*')
-    .eq('project_id', projectId)
     .not('deleted_at', 'is', null)
     .order('deleted_at', { ascending: false })
+  if (projectId) {
+    query = query.eq('project_id', projectId)
+  }
+  const { data, error } = await query
   if (error) throw error
   return data as Task[]
+}
+
+export async function getAllDeletedTasksCount(supabase: SupabaseClient) {
+  const { count, error } = await supabase
+    .from('tasks')
+    .select('*', { count: 'exact', head: true })
+    .not('deleted_at', 'is', null)
+  if (error) throw error
+  return count ?? 0
 }
 
 // ── Task Comments ──
