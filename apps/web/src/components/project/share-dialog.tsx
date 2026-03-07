@@ -23,7 +23,7 @@ import { Users, X, Loader2 } from 'lucide-react'
 import type { MemberRole, Profile, ProjectMember, ProjectInvite } from '@/types/database'
 import { MEMBER_ROLE_LABELS, SHAREABLE_ROLES } from '@/types/database'
 
-type MemberWithProfile = ProjectMember & { profile: Pick<Profile, 'id' | 'full_name' | 'avatar_url'> }
+type MemberWithProfile = ProjectMember & { profile: Pick<Profile, 'id' | 'full_name' | 'email' | 'avatar_url'> }
 
 interface ShareDialogProps {
   projectId: string
@@ -170,9 +170,16 @@ export function ShareDialog({ projectId, currentUserRole }: ShareDialogProps) {
                   <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
                     {(m.profile.full_name || '?').charAt(0).toUpperCase()}
                   </div>
-                  <span className="flex-1 truncate text-sm">
-                    {m.profile.full_name || 'Unknown'}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <span className="block truncate text-sm">
+                      {m.profile.full_name || 'Unknown'}
+                    </span>
+                    {m.profile.email && (
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {m.profile.email}
+                      </span>
+                    )}
+                  </div>
                   {m.role === 'owner' ? (
                     <Badge variant="secondary" className="text-[10px]">Owner</Badge>
                   ) : isAdmin ? (

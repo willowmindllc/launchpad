@@ -421,10 +421,10 @@ export async function getDashboardStats(supabase: SupabaseClient) {
 export async function getProjectMembers(supabase: SupabaseClient, projectId: string) {
   const { data, error } = await supabase
     .from('project_members')
-    .select('*, profile:profiles!project_members_user_id_fkey(id, full_name, avatar_url)')
+    .select('*, profile:profiles!project_members_user_id_fkey(id, full_name, email, avatar_url)')
     .eq('project_id', projectId)
   if (error) throw error
-  return data as (ProjectMember & { profile: Pick<Profile, 'id' | 'full_name' | 'avatar_url'> })[]
+  return data as (ProjectMember & { profile: Pick<Profile, 'id' | 'full_name' | 'email' | 'avatar_url'> })[]
 }
 
 export async function getProjectMemberRole(supabase: SupabaseClient, projectId: string, userId: string): Promise<MemberRole | null> {
