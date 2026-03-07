@@ -1,6 +1,6 @@
 export type TaskStatus = 'backlog' | 'in_progress' | 'review' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
-export type MemberRole = 'owner' | 'admin' | 'member' | 'viewer'
+export type MemberRole = 'owner' | 'admin' | 'editor' | 'member' | 'viewer'
 
 export type AIProvider = 'groq' | 'openai' | 'anthropic' | 'google'
 
@@ -93,7 +93,8 @@ export interface ProjectInvite {
 
 export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
   owner: 'Owner',
-  admin: 'Editor',
+  admin: 'Admin',
+  editor: 'Editor',
   member: 'Commenter',
   viewer: 'Viewer',
 }
@@ -101,7 +102,8 @@ export const MEMBER_ROLE_LABELS: Record<MemberRole, string> = {
 export const SHAREABLE_ROLES: { value: MemberRole; label: string }[] = [
   { value: 'viewer', label: 'Viewer' },
   { value: 'member', label: 'Commenter' },
-  { value: 'admin', label: 'Editor' },
+  { value: 'editor', label: 'Editor' },
+  { value: 'admin', label: 'Admin' },
 ]
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {

@@ -114,8 +114,8 @@ export function TaskDetailContent({
   projectId,
   userRole = 'owner',
 }: TaskDetailContentProps) {
-  const canEdit = userRole === 'owner' || userRole === 'admin'
-  const canComment = userRole === 'owner' || userRole === 'admin' || userRole === 'member'
+  const canEdit = userRole === 'owner' || userRole === 'admin' || userRole === 'editor'
+  const canComment = userRole === 'owner' || userRole === 'admin' || userRole === 'editor' || userRole === 'member'
   const supabase = createClient()
   const [saving, setSaving] = useState(false)
   const [title, setTitle] = useState(task.title)
