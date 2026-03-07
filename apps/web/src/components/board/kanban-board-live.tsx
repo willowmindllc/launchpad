@@ -78,7 +78,7 @@ function DroppableColumn({
 }
 
 export function KanbanBoardLive({ tasks: initialTasks, projectId, projectName, projectDescription, userRole = 'owner' }: KanbanBoardLiveProps) {
-  const canEdit = userRole === 'owner' || userRole === 'admin'
+  const canEdit = userRole === 'owner' || userRole === 'admin' || userRole === 'editor'
   const [tasks, setTasks] = useState(initialTasks)
   const [activeTask, setActiveTask] = useState<TaskWithAssignee | null>(null)
   const [trashOpen, setTrashOpen] = useState(false)
