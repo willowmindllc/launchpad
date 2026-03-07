@@ -57,7 +57,7 @@ export function GitHubLink({ projectId }: GitHubLinkProps) {
         .from('project_github_links')
         .select('*')
         .eq('project_id', projectId)
-        .single()
+        .maybeSingle()
 
       if (existingLink) {
         setLink(existingLink as ProjectGitHubLink)
