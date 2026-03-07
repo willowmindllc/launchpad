@@ -14,7 +14,7 @@ We only support the latest version on the `main` branch. Please ensure you're up
 
 Instead, please email us at:
 
-📧 **security@willowmindllc.tech**
+📧 **sameerthecoder@willowmindllc.tech**
 
 Include:
 - A description of the vulnerability
