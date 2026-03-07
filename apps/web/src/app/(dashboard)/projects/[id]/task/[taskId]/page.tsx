@@ -50,11 +50,12 @@ export default async function TaskPage({ params }: TaskPageProps) {
   try {
     task = await getTask(supabase, taskId)
   } catch {
-    notFound()
+    // Task not found (deleted/trashed) → redirect to project board
+    redirect(`/projects/${id}`)
   }
 
-  // Cross-project mismatch → 404
-  if (task.project_id !== id) notFound()
+  // Cross-project mismatch → redirect to correct project
+  if (task.project_id !== id) redirect(`/projects/${id}`)
 
   const memberRole = await getProjectMemberRole(supabase, id, user.id)
   const userRole = memberRole ?? (project.owner_id === user.id ? 'owner' as const : 'viewer' as const)
