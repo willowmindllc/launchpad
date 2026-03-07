@@ -147,18 +147,6 @@ export function GitHubLink({ projectId }: GitHubLinkProps) {
 
   if (loading) return null
 
-  if (!hasConnection) {
-    return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Github className="size-3.5" />
-        <a href="/settings" className="hover:text-foreground underline">
-          Connect GitHub
-        </a>
-        <span>to link a repo</span>
-      </div>
-    )
-  }
-
   if (link) {
     return (
       <div className="flex items-center gap-2">
@@ -172,15 +160,29 @@ export function GitHubLink({ projectId }: GitHubLinkProps) {
           {link.repo_owner}/{link.repo_name}
           <ExternalLink className="size-3" />
         </a>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 px-1.5 text-muted-foreground hover:text-destructive"
-          onClick={handleUnlink}
-          disabled={linking}
-        >
-          {linking ? <Loader2 className="size-3 animate-spin" /> : <Unlink className="size-3" />}
-        </Button>
+        {hasConnection && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-muted-foreground hover:text-destructive"
+            onClick={handleUnlink}
+            disabled={linking}
+          >
+            {linking ? <Loader2 className="size-3 animate-spin" /> : <Unlink className="size-3" />}
+          </Button>
+        )}
+      </div>
+    )
+  }
+
+  if (!hasConnection) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Github className="size-3.5" />
+        <a href="/settings" className="hover:text-foreground underline">
+          Connect GitHub
+        </a>
+        <span>to link a repo</span>
       </div>
     )
   }
