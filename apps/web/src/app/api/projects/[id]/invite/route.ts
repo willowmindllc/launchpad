@@ -39,7 +39,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       inviterName,
       projectName: project.name,
       inviteToken: invite.id,
-    }).catch((err) => console.error('Invite email failed:', err))
+    }).then(() => {
+      console.log(`Invite email sent to ${email} for project ${project.name}`)
+    }).catch((err) => {
+      console.error('Invite email failed:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
+    })
 
     return NextResponse.json({ invite })
   } catch (err: unknown) {
