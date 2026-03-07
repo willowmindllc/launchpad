@@ -92,7 +92,7 @@ Be respectful. We're all here to build something useful. Harassment, discriminat
 
 ## Questions?
 
-Open a [Discussion](https://github.com/willowmindllc/launchpad/discussions) or reach out at **hello@willowmindllc.tech**.
+Open a [Discussion](https://github.com/willowmindllc/launchpad/discussions) or reach out at **sameerthecoder@willowmindllc.tech**.
 
 ## License
 
