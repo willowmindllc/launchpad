@@ -2,14 +2,24 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
+import { TrashView } from '@/components/board/trash-view'
+import { createClient } from '@/lib/supabase/client'
+import { getAllDeletedTasksCount } from '@/lib/supabase/queries'
 import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [trashCount, setTrashCount] = useState(0)
+  const [trashOpen, setTrashOpen] = useState(false)
+  const supabase = createClient()
 
-  // Listen for trash count updates from kanban board
+  // Fetch global trash count on mount
+  useEffect(() => {
+    getAllDeletedTasksCount(supabase).then(setTrashCount).catch(() => {})
+  }, [supabase])
+
+  // Listen for trash count updates from kanban board (overrides global count)
   useEffect(() => {
     const handler = (e: CustomEvent) => setTrashCount(e.detail ?? 0)
     window.addEventListener('launchpad:trash-count', handler as EventListener)
@@ -17,7 +27,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [])
 
   const handleTrashClick = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('launchpad:open-trash'))
+    // Dispatch event — if a board page is listening, it handles its own trash
+    const event = new CustomEvent('launchpad:open-trash', { cancelable: true })
+    const handled = !window.dispatchEvent(event)
+    // If no board page handled it (event wasn't cancelled), open global trash
+    if (!handled) {
+      setTrashOpen(true)
+    }
   }, [])
 
   return (
@@ -50,6 +66,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <main className="flex-1 overflow-auto pt-14 md:pt-0">{children}</main>
+
+      {/* Global trash dialog (for non-board pages) */}
+      <TrashView
+        open={trashOpen}
+        onOpenChange={setTrashOpen}
+        onRestored={() => {
+          getAllDeletedTasksCount(supabase).then(setTrashCount).catch(() => {})
+        }}
+      />
     </div>
   )
 }

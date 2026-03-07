@@ -181,9 +181,12 @@ export function KanbanBoardLive({ tasks: initialTasks, projectId, projectName, p
     clearSelection()
   }, [selectedIds, supabase, router, initialTasks, clearSelection, refreshTrashCount])
 
-  // Listen for trash open from sidebar
+  // Listen for trash open from sidebar — preventDefault to prevent global trash dialog
   useEffect(() => {
-    const handler = () => setTrashOpen(true)
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setTrashOpen(true)
+    }
     window.addEventListener('launchpad:open-trash', handler)
     return () => window.removeEventListener('launchpad:open-trash', handler)
   }, [])
