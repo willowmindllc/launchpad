@@ -22,10 +22,10 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          # Check for LP-XXX or TF-XXX in title or body
-          if echo "$PR_TITLE $PR_BODY" | grep -qE '(LP|TF)-[0-9]+'; then
+          # Check for LP-XXX, WM-XXX, or TF-XXX in title or body
+          if echo "$PR_TITLE $PR_BODY" | grep -qE '(LP|WM|TF)-[0-9]+'; then
             echo "ticket_found=true" >> $GITHUB_OUTPUT
-            TICKET=$(echo "$PR_TITLE $PR_BODY" | grep -oE '(LP|TF)-[0-9]+' | head -1)
+            TICKET=$(echo "$PR_TITLE $PR_BODY" | grep -oE '(LP|WM|TF)-[0-9]+' | head -1)
             echo "ticket_id=$TICKET" >> $GITHUB_OUTPUT
           else
             echo "ticket_found=false" >> $GITHUB_OUTPUT
@@ -37,7 +37,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           # Check if any docs/ files changed
-          DOCS_CHANGED=$(git diff --name-only origin/main...HEAD -- docs/ | wc -l)
+          DOCS_CHANGED=$(git diff --name-only origin/main...HEAD -- apps/web/docs/ apps/docs/content/ '*.md' | wc -l)
           # Check if this is a feature PR
           IS_FEATURE=$(echo "$PR_TITLE" | grep -c "^feat" || true)
           
@@ -50,13 +50,11 @@ jobs:
       - name: Check for migration
         id: migration
         run: |
-          MIGRATION_CHANGED=$(git diff --name-only origin/main...HEAD -- supabase/migrations/ | wc -l)
+          MIGRATION_CHANGED=$(git diff --name-only origin/main...HEAD -- apps/web/supabase/migrations/ | wc -l)
           echo "has_migration=$([[ $MIGRATION_CHANGED -gt 0 ]] && echo true || echo false)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
