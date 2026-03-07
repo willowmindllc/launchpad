@@ -4,8 +4,8 @@
 
 A lightweight, AI-powered project management tool with a Kanban board, natural language task creation, board sharing, and GitHub integration.
 
-🔗 **Live:** [launchpad.willowmindllc.tech](https://launchpad.willowmindllc.tech) *(coming soon)*
-📖 **Docs:** [docs.launchpad.willowmindllc.tech](https://docs.launchpad.willowmindllc.tech) *(coming soon)*
+🔗 **Live:** [launchpad.willowmindllc.tech](https://launchpad.willowmindllc.tech)
+📖 **Docs:** [docs.launchpad.willowmindllc.tech](https://docs.launchpad.willowmindllc.tech)
 
 > Built by [Willowmind LLC](https://willowmindllc.tech)
 
