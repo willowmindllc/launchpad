@@ -7,6 +7,6 @@ DROP POLICY IF EXISTS "Users can insert activity" ON task_activity;
 CREATE POLICY "Project editors can insert activity" ON task_activity FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM tasks t WHERE t.id = task_activity.task_id
-      AND can_edit_project(t.project_id)
+      AND can_edit_project(t.project_id, auth.uid())
   )
 );

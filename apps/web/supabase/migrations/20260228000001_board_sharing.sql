@@ -2,9 +2,12 @@
 -- project_invites table, role-based helper functions, updated RLS policies
 
 -- ── project_invites table ──
-CREATE TYPE invite_status AS ENUM ('pending', 'accepted', 'declined');
+DO $$ BEGIN
+  CREATE TYPE invite_status AS ENUM ('pending', 'accepted', 'declined');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TABLE project_invites (
+CREATE TABLE IF NOT EXISTS project_invites (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   project_id uuid REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
   invited_email text NOT NULL,
@@ -16,8 +19,8 @@ CREATE TABLE project_invites (
   UNIQUE (project_id, invited_email)
 );
 
-CREATE INDEX idx_project_invites_email ON project_invites(invited_email);
-CREATE INDEX idx_project_invites_project ON project_invites(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_invites_email ON project_invites(invited_email);
+CREATE INDEX IF NOT EXISTS idx_project_invites_project ON project_invites(project_id);
 
 ALTER TABLE project_invites ENABLE ROW LEVEL SECURITY;
 
