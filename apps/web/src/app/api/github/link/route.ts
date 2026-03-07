@@ -27,26 +27,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'GitHub not connected' }, { status: 400 })
   }
 
-  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET!
+  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET
+
+  let webhookId: number | null = null
 
   try {
-    // Create webhook on the repo
-    const webhook = await createGitHubWebhook(
-      connection.access_token,
-      repoOwner,
-      repoName,
-      WEBHOOK_URL,
-      webhookSecret
-    )
+    if (!webhookSecret) {
+      console.warn('GITHUB_WEBHOOK_SECRET not set — linking without webhook')
+    } else if (!WEBHOOK_URL || WEBHOOK_URL === 'undefined/api/webhooks/github') {
+      console.warn('NEXT_PUBLIC_SITE_URL not set — linking without webhook')
+    } else {
+      // Create webhook on the repo
+      const webhook = await createGitHubWebhook(
+        connection.access_token,
+        repoOwner,
+        repoName,
+        WEBHOOK_URL,
+        webhookSecret
+      )
+      webhookId = webhook.id
+    }
+  } catch (webhookErr) {
+    // Log but don't fail — webhook is optional for the link
+    console.error('Webhook creation failed (linking anyway):', webhookErr)
+  }
 
-    // Store the link
+  try {
+    // Store the link (even without webhook)
     const { data, error } = await supabase
       .from('project_github_links')
       .upsert({
         project_id: projectId,
         repo_owner: repoOwner,
         repo_name: repoName,
-        webhook_id: webhook.id,
+        webhook_id: webhookId,
         sync_issues: true,
       }, { onConflict: 'project_id' })
       .select()
@@ -57,7 +71,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ link: data })
   } catch (err) {
     console.error('Failed to link repo:', err)
-    return NextResponse.json({ error: 'Failed to link repo' }, { status: 500 })
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to link repo' },
+      { status: 500 }
+    )
   }
 }
 
