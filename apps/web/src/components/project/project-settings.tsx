@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { updateProject, deleteProject, archiveProject } from '@/lib/supabase/queries'
+import { updateProject, deleteProject, archiveProject, backfillTicketPrefix } from '@/lib/supabase/queries'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -51,7 +51,18 @@ export function ProjectSettings({ project }: ProjectSettingsProps) {
         description: description.trim() || null,
         ticket_prefix: ticketPrefix.trim() ? validPrefix : null,
       })
-      setMessage({ type: 'success', text: 'Project updated.' })
+
+      // Backfill existing tasks with the new prefix
+      if (validPrefix && validPrefix !== project.ticket_prefix) {
+        const count = await backfillTicketPrefix(supabase, project.id, validPrefix)
+        if (count > 0) {
+          setMessage({ type: 'success', text: `Project updated. ${count} existing task${count > 1 ? 's' : ''} numbered.` })
+        } else {
+          setMessage({ type: 'success', text: 'Project updated.' })
+        }
+      } else {
+        setMessage({ type: 'success', text: 'Project updated.' })
+      }
       router.refresh()
     } catch {
       setMessage({ type: 'error', text: 'Failed to update project.' })
