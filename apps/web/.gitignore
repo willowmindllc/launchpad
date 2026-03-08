@@ -45,3 +45,8 @@ next-env.d.ts
 test-results/
 playwright-report/
 .env*.local
+
+# Playwright
+test-results/
+playwright-report/
+tests/e2e/.auth/
