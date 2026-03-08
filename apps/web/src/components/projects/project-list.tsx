@@ -104,19 +104,19 @@ export function ProjectList({ projects, sharedProjects = [], archivedProjects = 
             <DialogHeader>
               <DialogTitle>Create Project</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
+            <form onSubmit={(e) => { e.preventDefault(); handleCreate() }} className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label>Name</Label>
-                <Input placeholder="My Awesome Project" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <Input placeholder="My Awesome Project" value={newName} onChange={(e) => setNewName(e.target.value)} autoFocus />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Input placeholder="What's this project about?" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
               </div>
-              <Button className="w-full" onClick={handleCreate} disabled={loading || !newName.trim()}>
+              <Button type="submit" className="w-full" disabled={loading || !newName.trim()}>
                 {loading ? 'Creating...' : 'Create'}
               </Button>
-            </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>

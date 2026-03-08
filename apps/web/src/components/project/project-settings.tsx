@@ -101,49 +101,51 @@ export function ProjectSettings({ project }: ProjectSettingsProps) {
           <CardTitle>General</CardTitle>
           <CardDescription>Update your project name and description.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="project-name">Name</Label>
-            <Input
-              id="project-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Project name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="project-description">Description</Label>
-            <Input
-              id="project-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What's this project about?"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ticket-prefix">Ticket Prefix</Label>
-            <Input
-              id="ticket-prefix"
-              value={ticketPrefix}
-              onChange={(e) => setTicketPrefix(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5))}
-              placeholder="e.g. LP, SB, WM"
-              maxLength={5}
-              className="w-32 uppercase"
-            />
-            <p className="text-xs text-muted-foreground">
-              {ticketPrefix && /^[A-Z]{2,5}$/.test(ticketPrefix)
-                ? `New tasks will be numbered ${ticketPrefix}-001, ${ticketPrefix}-002, etc.`
-                : 'Optional. 2–5 letters. Auto-numbers new tasks.'}
-            </p>
-          </div>
-          {message && (
-            <p className={`text-sm ${message.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-              {message.text}
-            </p>
-          )}
-          <Button onClick={handleSave} disabled={saving || !name.trim()}>
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
+        <CardContent>
+          <form onSubmit={(e) => { e.preventDefault(); handleSave() }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Name</Label>
+              <Input
+                id="project-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Project name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description</Label>
+              <Input
+                id="project-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What's this project about?"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ticket-prefix">Ticket Prefix</Label>
+              <Input
+                id="ticket-prefix"
+                value={ticketPrefix}
+                onChange={(e) => setTicketPrefix(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5))}
+                placeholder="e.g. LP, SB, WM"
+                maxLength={5}
+                className="w-32 uppercase"
+              />
+              <p className="text-xs text-muted-foreground">
+                {ticketPrefix && /^[A-Z]{2,5}$/.test(ticketPrefix)
+                  ? `New tasks will be numbered ${ticketPrefix}-001, ${ticketPrefix}-002, etc.`
+                  : 'Optional. 2–5 letters. Auto-numbers new tasks.'}
+              </p>
+            </div>
+            {message && (
+              <p className={`text-sm ${message.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                {message.text}
+              </p>
+            )}
+            <Button type="submit" disabled={saving || !name.trim()}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
