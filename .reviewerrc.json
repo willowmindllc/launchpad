@@ -2,7 +2,7 @@
     "maxFunctionLines": 80,
     "requireDocs": true,
     "requireTicketRef": true,
-    "ticketPattern": "LP-\\d+",
+    "ticketPattern": "LP-[0-9]+",
     "forbiddenFiles": [
         ".env",
         ".env.local",

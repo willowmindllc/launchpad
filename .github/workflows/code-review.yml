@@ -42,7 +42,7 @@ jobs:
           
           REQUIRE_DOCS=$(echo "$CONFIG" | jq -r '.requireDocs // true')
           REQUIRE_TICKET=$(echo "$CONFIG" | jq -r '.requireTicketRef // true')
-          TICKET_PATTERN=$(echo "$CONFIG" | jq -r '.ticketPattern // "MY-\\d+|LP-\\d+|BP-\\d+|WM-\\d+"')
+          TICKET_PATTERN=$(echo "$CONFIG" | jq -r '.ticketPattern // "MY-[0-9]+|LP-[0-9]+|BP-[0-9]+|WM-[0-9]+"')
           FORBIDDEN=$(echo "$CONFIG" | jq -r '.forbiddenFiles // [".env", ".env.local", ".env.production"] | .[]')
           
           # Check ticket ref
