@@ -71,9 +71,19 @@ pnpm --filter @launchpad/web build
 ### Test
 
 ```bash
-# E2E tests (requires BASE_URL)
 cd apps/web
-BASE_URL="http://localhost:3000" npx playwright test
+
+# Smoke tests (no credentials needed)
+BASE_URL="http://localhost:3000" npx playwright test --project=smoke
+
+# Full suite (requires test user)
+E2E_USER_EMAIL="test@example.com" \
+E2E_USER_PASSWORD="password" \
+BASE_URL="http://localhost:3000" \
+npx playwright test
+
+# Mobile smoke tests
+BASE_URL="http://localhost:3000" npx playwright test --project=mobile
 ```
 
 ## Features
@@ -103,10 +113,16 @@ BASE_URL="http://localhost:3000" npx playwright test
 - **Export CSV** — Download tasks for reporting or backup
 - **E2E Testing** — Playwright test suite
 
+### Security
+- **Rate Limiting** — Sliding window rate limiter on all API routes (AI, auth, invites, webhooks)
+- **RLS Everywhere** — Row-Level Security on every table, audited with SECURITY DEFINER functions
+- **Security Headers** — CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy
+
 ### Platform
 - **Multi-Auth** — Email/password, GitHub OAuth, Google OAuth
 - **Dark Mode** — Dark theme by default
 - **Mobile Responsive** — Tab-based single column view on mobile
+- **Editor Role** — Granular permissions: Owner, Admin, Editor, Commenter, Viewer
 
 ## Tech Stack
 
