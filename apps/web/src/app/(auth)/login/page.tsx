@@ -28,9 +28,10 @@ function LoginForm() {
   const supabase = createClient()
   const next = searchParams.get('next')
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
   const callbackUrl = next
-    ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-    : `${window.location.origin}/auth/callback`
+    ? `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${siteUrl}/auth/callback`
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -169,7 +169,9 @@ export async function createTask(supabase: SupabaseClient, task: {
     if (project?.ticket_prefix) {
       // Use configured prefix (e.g., "LP" → "LP-")
       projectPrefix = `${project.ticket_prefix}-`
+      console.log('[createTask] Using project prefix:', projectPrefix)
     } else {
+      console.log('[createTask] No ticket_prefix on project, falling back to pattern detection')
       // Fallback: detect from existing task titles
       const { data: existingTasks } = await supabase
         .from('tasks')
