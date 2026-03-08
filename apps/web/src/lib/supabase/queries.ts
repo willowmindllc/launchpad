@@ -1,6 +1,52 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Project, Task, TaskStatus, TaskPriority, Profile, TaskComment, TaskActivity, MemberRole, ProjectInvite, ProjectMember } from '@/types/database'
 
+// ── Ticket Prefix Backfill ──
+
+export async function backfillTicketPrefix(supabase: SupabaseClient, projectId: string, prefix: string) {
+  const prefixPattern = /^[A-Z]+-\d{3}/
+
+  // Get all tasks for the project, oldest first
+  const { data: tasks, error } = await supabase
+    .from('tasks')
+    .select('id, title')
+    .eq('project_id', projectId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: true })
+
+  if (error || !tasks?.length) return 0
+
+  // Filter to only unprefixed tasks
+  const unprefixed = tasks.filter(t => !prefixPattern.test(t.title))
+  if (!unprefixed.length) return 0
+
+  // Find max existing number for this prefix (in case some already have it)
+  const numberPattern = new RegExp(`^${prefix}-(\d{3})`)
+  let maxNum = 0
+  for (const t of tasks) {
+    const match = t.title.match(numberPattern)
+    if (match) {
+      const num = parseInt(match[1], 10)
+      if (num > maxNum) maxNum = num
+    }
+  }
+
+  // Backfill sequentially
+  let count = 0
+  for (const task of unprefixed) {
+    maxNum++
+    const num = String(maxNum).padStart(3, '0')
+    const newTitle = `${prefix}-${num}: ${task.title}`
+    const { error: updateError } = await supabase
+      .from('tasks')
+      .update({ title: newTitle })
+      .eq('id', task.id)
+    if (!updateError) count++
+  }
+
+  return count
+}
+
 // ── Profiles ──
 
 export async function getProfile(supabase: SupabaseClient, userId: string) {
