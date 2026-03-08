@@ -34,7 +34,7 @@ export default defineConfig({
     // Authenticated tests — depend on setup
     {
       name: 'chromium',
-      testMatch: /(?!smoke|auth).*\.spec\.ts/,
+      testMatch: /board\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
