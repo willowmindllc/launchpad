@@ -67,10 +67,10 @@ export function CreateTaskDialog({ defaultStatus = 'backlog', projectId, onCreat
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-4">
+        <form onSubmit={(e) => { e.preventDefault(); handleCreate() }} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label>Title</Label>
-            <Input placeholder="What needs to be done?" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input placeholder="What needs to be done?" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
           </div>
           <div className="space-y-2">
             <Label>Description</Label>
@@ -89,10 +89,10 @@ export function CreateTaskDialog({ defaultStatus = 'backlog', projectId, onCreat
               </SelectContent>
             </Select>
           </div>
-          <Button className="w-full" onClick={handleCreate} disabled={loading || !title.trim()}>
+          <Button type="submit" className="w-full" disabled={loading || !title.trim()}>
             {loading ? 'Creating...' : 'Create Task'}
           </Button>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   )
