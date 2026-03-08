@@ -151,41 +151,64 @@ export async function createTask(supabase: SupabaseClient, task: {
   assignee_id?: string
   due_date?: string
 }) {
-  // Auto-number: detect project prefix and assign next number
-  const { data: existingTasks } = await supabase
-    .from('tasks')
-    .select('title')
-    .eq('project_id', task.project_id)
-    .order('created_at', { ascending: false })
-    .limit(200)
-
-  let finalTitle = task.title
+  // Auto-number: use project.ticket_prefix if set, otherwise detect from existing tasks
   const prefixPattern = /^([A-Z]+-)\d{3}/
-  const titles = (existingTasks ?? []).map((t: { title: string }) => t.title)
+  let finalTitle = task.title
 
-  // Detect project prefix from existing tasks
-  const prefixCounts: Record<string, number> = {}
-  for (const t of titles) {
-    const match = t.match(prefixPattern)
-    if (match) {
-      prefixCounts[match[1]] = (prefixCounts[match[1]] || 0) + 1
-    }
-  }
-  const projectPrefix = Object.entries(prefixCounts).sort((a, b) => b[1] - a[1])[0]?.[0]
+  // Skip auto-numbering if user already included a prefix
+  if (!prefixPattern.test(task.title)) {
+    // Try to get ticket_prefix from project
+    const { data: project } = await supabase
+      .from('projects')
+      .select('ticket_prefix')
+      .eq('id', task.project_id)
+      .single()
 
-  // If user didn't include a prefix, auto-number
-  if (projectPrefix && !prefixPattern.test(task.title)) {
-    const numberPattern = new RegExp(`^${projectPrefix.replace('-', '-')}(\\d{3})`)
-    let maxNum = 0
-    for (const t of titles) {
-      const match = t.match(numberPattern)
-      if (match) {
-        const num = parseInt(match[1], 10)
-        if (num > maxNum) maxNum = num
+    let projectPrefix: string | null = null
+
+    if (project?.ticket_prefix) {
+      // Use configured prefix (e.g., "LP" → "LP-")
+      projectPrefix = `${project.ticket_prefix}-`
+    } else {
+      // Fallback: detect from existing task titles
+      const { data: existingTasks } = await supabase
+        .from('tasks')
+        .select('title')
+        .eq('project_id', task.project_id)
+        .order('created_at', { ascending: false })
+        .limit(200)
+
+      const titles = (existingTasks ?? []).map((t: { title: string }) => t.title)
+      const prefixCounts: Record<string, number> = {}
+      for (const t of titles) {
+        const match = t.match(prefixPattern)
+        if (match) {
+          prefixCounts[match[1]] = (prefixCounts[match[1]] || 0) + 1
+        }
       }
+      projectPrefix = Object.entries(prefixCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
     }
-    const nextNum = String(maxNum + 1).padStart(3, '0')
-    finalTitle = `${projectPrefix}${nextNum}: ${task.title}`
+
+    if (projectPrefix) {
+      // Find max existing number for this prefix
+      const { data: existingTasks } = await supabase
+        .from('tasks')
+        .select('title')
+        .eq('project_id', task.project_id)
+        .like('title', `${projectPrefix}%`)
+
+      const numberPattern = new RegExp(`^${projectPrefix.replace('-', '\\-')}(\\d{3})`)
+      let maxNum = 0
+      for (const t of (existingTasks ?? [])) {
+        const match = t.title.match(numberPattern)
+        if (match) {
+          const num = parseInt(match[1], 10)
+          if (num > maxNum) maxNum = num
+        }
+      }
+      const nextNum = String(maxNum + 1).padStart(3, '0')
+      finalTitle = `${projectPrefix}${nextNum}: ${task.title}`
+    }
   }
 
   // Get max position for the status column

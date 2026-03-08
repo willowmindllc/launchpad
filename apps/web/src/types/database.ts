@@ -30,6 +30,7 @@ export interface Project {
   owner_id: string
   archived: boolean
   archived_at: string | null
+  ticket_prefix: string | null
   created_at: string
   updated_at: string
 }
