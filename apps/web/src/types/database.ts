@@ -141,3 +141,17 @@ export interface ProjectGitHubLink {
   sync_issues: boolean
   created_at: string
 }
+
+export type AgentPermission = 'read' | 'write' | 'admin'
+
+export interface AgentToken {
+  id: string
+  project_id: string
+  name: string
+  token_hash: string
+  permissions: AgentPermission[]
+  created_by: string
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
+}
