@@ -37,10 +37,10 @@ function getClientIp(req: NextRequest): string {
 
 export async function rateLimit(
   req: NextRequest,
-  config: RateLimitConfig
+  config: RateLimitConfig,
+  customKey?: string
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
-  const ip = getClientIp(req)
-  const key = `${req.nextUrl.pathname}:${ip}`
+  const key = customKey || `${req.nextUrl.pathname}:${getClientIp(req)}`
   const now = Date.now()
   const windowMs = config.windowSeconds * 1000
 
