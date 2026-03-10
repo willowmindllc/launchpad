@@ -25,6 +25,11 @@ function getRateLimitConfig(pathname: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Agent API routes use their own token auth — skip session middleware
+  if (pathname.startsWith('/api/agent/')) {
+    return NextResponse.next()
+  }
+
   // Rate limit API routes
   if (pathname.startsWith('/api/')) {
     const config = getRateLimitConfig(pathname)
