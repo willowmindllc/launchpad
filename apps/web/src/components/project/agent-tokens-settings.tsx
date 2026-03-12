@@ -201,7 +201,7 @@ export function AgentTokensSettings({ projectId }: AgentTokensSettingsProps) {
                         id="token-name"
                         value={tokenName}
                         onChange={(e) => setTokenName(e.target.value)}
-                        placeholder="e.g. Mahadev Builder, CI Bot"
+                        placeholder="e.g. Mahadev Builder, lp-myla-token, CI Bot"
                       />
                     </div>
                     <div className="space-y-2">
